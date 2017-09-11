@@ -1,0 +1,77 @@
+#!/bin/sh
+
+PAPT_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/papt"
+PAPT_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/papt"
+PAPT_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/papt"
+
+PAPT_APT_CONFIG="${PAPT_CONFIG_HOME}/apt.conf"
+PAPT_APT_CONFIG_D="${PAPT_CONFIG_HOME}/apt.conf.d"
+
+check_config() {
+  if [ ! -d "${PAPT_APT_CONFIG_D}" ]; then
+    echo "papt unconfigured! Please run papt --setup"
+    exit 1
+  fi
+}
+
+check_fakeroot() {
+  if ! which fakeroot > /dev/null; then
+    echo "fakeroot is unavailable, please install fakeroot"
+    exit 2
+  fi
+}
+
+setup() {
+  echo -n "Setting up papt..."
+  mkdir -p \
+        "${PAPT_CACHE_HOME}" \
+        "${PAPT_CONFIG_HOME}" \
+        "${PAPT_APT_CONFIG_D}" \
+        "${PAPT_CONFIG_HOME}/preferences.d" \
+        "${PAPT_CONFIG_HOME}/sources.list.d" \
+        "${PAPT_DATA_HOME}/var/cache/apt/archives/partial" \
+        "${PAPT_DATA_HOME}/var/log/apt" \
+        "${PAPT_DATA_HOME}/var/lib/apt" \
+        "${PAPT_DATA_HOME}/var/lib/apt/lists" \
+        "${PAPT_DATA_HOME}/var/lib/dpkg" \
+        "${PAPT_DATA_HOME}/var/lib/dpkg/info" \
+        "${PAPT_DATA_HOME}/var/lib/dpkg/updates"
+
+  touch "${PAPT_DATA_HOME}/var/lib/dpkg/status"
+  touch "${PAPT_CONFIG_HOME}/sources.list"
+
+  setup_mk_config
+
+  echo "  done."
+  exit 0
+}
+
+setup_mk_config() {
+  cat <<EOCONFIG > "${PAPT_APT_CONFIG}"
+Dir "${HOME}";
+Dir::Cache "${PAPT_CACHE_HOME}";
+Dir::Etc "${PAPT_CONFIG_HOME}";
+Dir::Log "${PAPT_DATA_HOME}/var/log/apt";
+Dir::State "${PAPT_DATA_HOME}/var/lib/apt";
+Dir::State::status "${PAPT_DATA_HOME}/var/lib/dpkg/status";
+
+#clear DPkg;
+
+DPkg::options {
+  "--root=${HOME}";
+  "--admindir=${PAPT_DATA_HOME}/var/lib/dpkg"
+  "--log=${PAPT_DATA_HOME}/var/log/dpkg.log";
+}
+EOCONFIG
+}
+
+if [ "$1" = "--setup" ]; then
+  setup
+  exit
+fi
+
+check_config
+check_fakeroot
+
+export APT_CONFIG="${PAPT_APT_CONFIG}"
+fakeroot apt "$@"
