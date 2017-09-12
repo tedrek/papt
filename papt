@@ -60,7 +60,7 @@ Dir::State::status "${PAPT_DATA_HOME}/var/lib/dpkg/status";
 
 DPkg::options {
   "--root=${HOME}";
-  "--admindir=${PAPT_DATA_HOME}/var/lib/dpkg"
+  "--admindir=${PAPT_DATA_HOME}/var/lib/dpkg";
   "--log=${PAPT_DATA_HOME}/var/log/dpkg.log";
 }
 EOCONFIG
