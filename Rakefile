@@ -51,7 +51,7 @@ task :build do
      "--license gpl3 " +
      "--category admin " +
      "--deb-priority optional " +
-     "papt=/bin/papt pdpkg=/bin/pdpkg")
+     "papt=bin/papt pdpkg=bin/pdpkg")
 end
 
 task :changes do
