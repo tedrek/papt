@@ -29,6 +29,7 @@ setup() {
         "${PAPT_APT_CONFIG_D}" \
         "${PAPT_CONFIG_HOME}/preferences.d" \
         "${PAPT_CONFIG_HOME}/sources.list.d" \
+        "${PAPT_CONFIG_HOME}/trusted.gpg.d" \
         "${PAPT_DATA_HOME}/var/cache/apt/archives/partial" \
         "${PAPT_DATA_HOME}/var/log/apt" \
         "${PAPT_DATA_HOME}/var/lib/apt" \
