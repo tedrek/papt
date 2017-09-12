@@ -1,0 +1,32 @@
+#!/bin/sh
+
+PAPT_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/papt"
+PAPT_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/papt"
+PAPT_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/papt"
+
+PAPT_APT_CONFIG="${PAPT_CONFIG_HOME}/apt.conf"
+PAPT_APT_CONFIG_D="${PAPT_CONFIG_HOME}/apt.conf.d"
+
+check_config() {
+  if [ ! -d "${PAPT_APT_CONFIG_D}" ]; then
+    echo "papt unconfigured! Please run papt --setup"
+    exit 1
+  fi
+}
+
+check_fakeroot() {
+  if ! which fakeroot > /dev/null; then
+    echo "fakeroot is unavailable, please install fakeroot"
+    exit 2
+  fi
+}
+
+check_config
+check_fakeroot
+
+export APT_CONFIG="${PAPT_APT_CONFIG}"
+fakeroot dpkg \
+         "--root=${HOME}" \
+         "--admindir=${PAPT_DATA_HOME}/var/lib/dpkg" \
+         "--log=${PAPT_DATA_HOME}/var/log/dpkg.log" \
+         "$@"
